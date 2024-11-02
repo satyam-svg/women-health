@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, StatusBar, Image } from 'react-native';
+import { StyleSheet, StatusBar, Image, Button } from 'react-native';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import { useFonts } from 'expo-font'; // Import useFonts from expo-font
@@ -23,13 +23,18 @@ const StartScreen = () => {
       />
       <ThemedText style={styles.title}>MEDICARE</ThemedText>
       <ThemedView style={styles.lottieContainer}>
-        <LottieView 
-          source={require('../assets/doctor.json')} 
-          autoPlay 
-          loop 
-          style={styles.lottie} // Apply the style here
-        />
+          
       </ThemedView>
+
+      <ThemedView style={styles.getstarted}>
+            <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#E4E4E4',flex:1,justifyContent:'center',alignItems:'center'}}>
+              <ThemedText style={{fontWeight:'900',fontSize:20}}>Sign in</ThemedText>
+            </ThemedView>
+            <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#3E69FE',flex:1,justifyContent:'center',alignItems:'center'}}>
+            <ThemedText style={{fontWeight:'900',fontSize:20}}>Get Started</ThemedText>
+            </ThemedView>
+          </ThemedView>
+
     </ThemedView>
   );
 };
@@ -53,7 +58,7 @@ const styles = StyleSheet.create({
   },
   lottieContainer: {
     width: 250,  // Set the width for the Lottie animation container
-    height: 250, // Set the height for the Lottie animation container
+    height: 500, // Set the height for the Lottie animation container
     justifyContent: 'center', // Center the animation
     alignItems: 'center', // Center the animation
     backgroundColor: 'transparent', // Set background to transparent
@@ -62,6 +67,12 @@ const styles = StyleSheet.create({
     width: '100%', // Make the animation fill the container
     height: '100%', // Make the animation fill the container
   },
+  getstarted:{
+    backgroundColor: '#CAF0F8',
+    flex:1,
+    flexDirection:'row',
+    gap:20
+  }
 });
 
 export default StartScreen;

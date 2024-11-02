@@ -7,7 +7,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import SplashScreenAnimation from '../components/SplashScreenAnimation';
 import StartScreen from '../components/Starter'; // Import your LoginScreen
-
+import Login from '../components/Login';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -38,6 +38,7 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>

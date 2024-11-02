@@ -23,7 +23,7 @@ const SplashScreenAnimation: React.FC<SplashScreenAnimationProps> = ({ onFinish 
       <StatusBar hidden/>
       <LottieView
         ref={animation}
-        source={require('../assets/medical.json')} // Lottie animation path
+        source={require('../assets/medical.json')} 
         autoPlay
         loop={false}
         style={{ width: 250, height: 250 }}
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#CAF0F8', // Adjust the background color as needed
+    backgroundColor: '#CAF0F8',
   },
 });
 
