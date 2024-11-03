@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, StatusBar, Image, Button } from 'react-native';
-import { ThemedView } from './ThemedView';
-import { ThemedText } from './ThemedText';
+import { ThemedView } from '../components/ThemedView';
+import { ThemedText } from '../components/ThemedText';
 import { useFonts } from 'expo-font'; // Import useFonts from expo-font
 import LottieView from 'lottie-react-native';
-
+import { Link } from 'expo-router';
 const StartScreen = () => {
   const [fontsLoaded] = useFonts({
     OpenSansCondensedBoldItalic: require('../assets/fonts/OpenSansCondensedBoldItalic.ttf'), // Load your font
@@ -28,7 +28,7 @@ const StartScreen = () => {
 
       <ThemedView style={styles.getstarted}>
             <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#E4E4E4',flex:1,justifyContent:'center',alignItems:'center'}}>
-              <ThemedText style={{fontWeight:'900',fontSize:20}}>Sign in</ThemedText>
+              <ThemedText style={{fontWeight:'900',fontSize:20}}><Link href="/login">Sign in</Link></ThemedText>
             </ThemedView>
             <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#3E69FE',flex:1,justifyContent:'center',alignItems:'center'}}>
             <ThemedText style={{fontWeight:'900',fontSize:20}}>Get Started</ThemedText>

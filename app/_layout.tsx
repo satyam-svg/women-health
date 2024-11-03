@@ -6,44 +6,41 @@ import { useState, useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import SplashScreenAnimation from '../components/SplashScreenAnimation';
-import StartScreen from '../components/Starter'; // Import your LoginScreen
-import Login from '../components/Login';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [showSplash, setShowSplash] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false); // New state for login
 
   useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync(); // Hide Expo’s native splash
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
   const handleSplashFinish = () => {
-    setShowSplash(false); // Transition to login after splash
+    setShowSplash(false); // Transition to main layout after splash
   };
 
- 
-  if (!loaded) return null;
+  if (!fontsLoaded) return null;
 
   return (
     showSplash ? (
       <SplashScreenAnimation onFinish={handleSplashFinish} />
-    ) : loggedIn ? ( // Show main app layout if logged in
+    ) : (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
           
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>
-    ) : ( // Show login component if not logged in
-      <StartScreen  />
     )
   );
 }
