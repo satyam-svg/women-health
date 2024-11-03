@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { TextInput, TouchableOpacity, StyleSheet, Alert, View, Text, Image } from 'react-native';
+import { TextInput, TouchableOpacity, StyleSheet, Alert, View, Text, Image, Dimensions } from 'react-native';
 import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link } from 'expo-router';
+
+const { width, height } = Dimensions.get('window');
+
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -19,10 +22,9 @@ const LoginPage = () => {
 
   return (
     <ThemedView style={styles.container}>
-        <ThemedView style={styles.logoContainer}>
-            <Image source={require('../assets/images/medicare.png')} style={{height:50,width:50}}></Image>
-          <ThemedText style={{fontWeight:'bold',fontSize:30,marginTop:20}}>Medicare</ThemedText>
-        
+      <ThemedView style={styles.logoContainer}>
+        <Image source={require('../assets/images/medicare.png')} style={styles.logoImage} />
+        <ThemedText style={styles.logoText}>Medicare</ThemedText>
       </ThemedView>
       <ThemedView style={styles.innerContainer}>
         <ThemedText style={styles.title}>Sign Up</ThemedText>
@@ -61,12 +63,9 @@ const LoginPage = () => {
           <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
 
-        {/* OR Separator */}
-        
-
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Already have an account? </Text>
-          <TouchableOpacity >
+          <TouchableOpacity>
             <Text style={styles.signupLink}><Link href="/login">Sign in</Link></Text>
           </TouchableOpacity>
         </View>
@@ -78,13 +77,12 @@ const LoginPage = () => {
         </View>
 
         <ThemedView style={styles.icons}>
-            <ThemedView style={{width:50,height:50,backgroundColor:'#FF5A5F',alignItems:'center',justifyContent:'center',borderRadius:10}}>
-            <AntDesign name="google" size={24} color="white"  />
-            </ThemedView>
-            <ThemedView style={{width:50,height:50,backgroundColor:'#FF5A5F',alignItems:'center',justifyContent:'center',borderRadius:10}}>
+          <ThemedView style={styles.iconWrapper}>
+            <AntDesign name="google" size={24} color="white" />
+          </ThemedView>
+          <ThemedView style={styles.iconWrapper}>
             <FontAwesome name="facebook-f" size={24} color="white" />
-            </ThemedView>
-           
+          </ThemedView>
         </ThemedView>
       </ThemedView>
     </ThemedView>
@@ -96,33 +94,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#CAF0F8',
   },
-  logoContainer:{
+  logoContainer: {
     backgroundColor: '#CAF0F8',
     alignItems: 'center',
-    marginTop:40,
-    
+    marginTop: height * 0.05,
+  },
+  logoImage: {
+    height: 50,
+    width: 50,
+    resizeMode: 'contain',
+  },
+  logoText: {
+    fontWeight: 'bold',
+    fontSize: width * 0.08,
+    marginTop: 20,
   },
   innerContainer: {
     marginTop: '10%',
     width: '100%',
-    height: '100%',
     padding: 40,
     borderRadius: 40,
     backgroundColor: '#fff',
-    elevation: 5,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
+    flex: 1,
   },
   title: {
-    fontSize: 25,
+    fontSize: width * 0.06,
     fontWeight: 'bold',
-    marginBottom: 70,
+    marginBottom: height * 0.04,
     color: '#333',
   },
   label: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: '#333',
     fontWeight: 'bold',
     marginBottom: 5,
@@ -153,12 +159,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: width * 0.045,
   },
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 50,
+    marginVertical: height * 0.05,
   },
   line: {
     flex: 1,
@@ -182,12 +188,20 @@ const styles = StyleSheet.create({
     color: '#FF5A5F',
     fontWeight: 'bold',
   },
-  icons:{
-    flex: 1,
+  icons: {
     flexDirection: 'row',
     gap: 20,
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+    marginTop: height * 0.02,
+  },
+  iconWrapper: {
+    width: 50,
+    height: 50,
+    backgroundColor: '#FF5A5F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
 });
 
 export default LoginPage;
