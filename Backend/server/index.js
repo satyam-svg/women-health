@@ -1,4 +1,4 @@
-// index.js
+// Import required modules
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+// Initialize express app
 const app = express();
 const PORT = 3000;
 const SECRET_KEY = 'your_secret_key';
@@ -14,20 +15,25 @@ const SECRET_KEY = 'your_secret_key';
 app.use(cors());
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb+srv://soumya30garg:<db_password>@cluster1.z1jqe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1', { useNewUrlParser: true, useUnifiedTopology: true })
+// MongoDB connection (directly using URI in code)
+mongoose.connect('mongodb+srv://satyammaurya9620:Rg3yZsQLtq82pgjz@cluster0.mg721.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// User Schema
+
+// Define User Schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 });
 
+// Create User model
 const User = mongoose.model('User', userSchema);
 
-// Sign Up Route
+// Route: Sign Up
 app.post('/signup', async (req, res) => {
   const { username, password } = req.body;
 
@@ -49,7 +55,7 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// Login Route
+// Route: Login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -74,7 +80,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Protected Route Example
+// Route: Protected (Example)
 app.get('/protected', (req, res) => {
   const token = req.headers['authorization'];
   if (!token) {
@@ -89,7 +95,7 @@ app.get('/protected', (req, res) => {
   });
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
