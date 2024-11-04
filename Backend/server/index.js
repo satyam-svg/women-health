@@ -8,7 +8,8 @@ const mongoose = require('mongoose');
 
 const app = express();
 const PORT = 3000;
-const SECRET_KEY = 'your_secret_key';
+const SECRET_KEY = '
+7cad34a57442f05e33fbf97483e725ce6021c7f02374fa507c0214e031b08ebe7f2473eabd62642c79460afa4da1990122b9b187dcf1491eef0a2ae698d5e0da';
 
 // Middleware
 app.use(cors());
