@@ -5,13 +5,19 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
-    }
+      ],
+      // Add any other paths you might need here
+    },
+    "typeRoots": [
+      "./node_modules/@types", // This includes standard type definitions
+      "./@types" // This includes your custom type declarations
+    ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "@types/**/*" // Include your custom types in the compilation
   ]
 }

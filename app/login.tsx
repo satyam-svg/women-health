@@ -1,28 +1,53 @@
 import React, { useState } from 'react';
 import { TextInput, TouchableOpacity, StyleSheet, Alert, View, Text, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link } from 'expo-router';
-const LoginPage = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'password') {
-      Alert.alert('Login Successful', `Welcome, ${username}!`);
-    } else {
-      Alert.alert('Login Failed', 'Incorrect username or password.');
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://192.168.192.168:3000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Store the username from the response
+        const username = data.username; // Ensure your backend returns this
+        Alert.alert('Login Successful', `Welcome, ${username}!`);
+
+        
+        router.push({ pathname: '/profile', params: { username } });
+      } else {
+        Alert.alert('Login Failed', data.message || 'Incorrect email or password.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred. Please try again.');
     }
   };
 
   return (
     <ThemedView style={styles.container}>
-        <ThemedView style={styles.logoContainer}>
-            <Image source={require('../assets/images/medicare.png')} style={{height:50,width:50}}></Image>
-          <ThemedText style={{fontWeight:'bold',fontSize:30,marginTop:20}}>Medicare</ThemedText>
-        
+      <ThemedView style={styles.logoContainer}>
+        <Image source={require('../assets/images/medicare.png')} style={{ height: 50, width: 50 }} />
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 30, marginTop: 20 }}>Medicare</ThemedText>
       </ThemedView>
       <ThemedView style={styles.innerContainer}>
         <ThemedText style={styles.title}>Sign In</ThemedText>
@@ -31,8 +56,8 @@ const LoginPage = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter email"
-          value={username}
-          onChangeText={setUsername}
+          value={email}
+          onChangeText={setEmail}
           autoCapitalize="none"
         />
 
@@ -53,12 +78,9 @@ const LoginPage = () => {
           <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
 
-        {/* OR Separator */}
-        
-
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don’t have an account? </Text>
-          <TouchableOpacity >
+          <TouchableOpacity>
             <Text style={styles.signupLink}><Link href="/signup">Sign Up</Link></Text>
           </TouchableOpacity>
         </View>
@@ -70,19 +92,17 @@ const LoginPage = () => {
         </View>
 
         <ThemedView style={styles.icons}>
-            <ThemedView style={{width:50,height:50,backgroundColor:'#FF5A5F',alignItems:'center',justifyContent:'center',borderRadius:10}}>
-            <AntDesign name="google" size={24} color="white"  />
-            </ThemedView>
-            <ThemedView style={{width:50,height:50,backgroundColor:'#FF5A5F',alignItems:'center',justifyContent:'center',borderRadius:10}}>
+          <ThemedView style={{ width: 50, height: 50, backgroundColor: '#FF5A5F', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
+            <AntDesign name="google" size={24} color="white" />
+          </ThemedView>
+          <ThemedView style={{ width: 50, height: 50, backgroundColor: '#FF5A5F', alignItems: 'center', justifyContent: 'center', borderRadius: 10 }}>
             <FontAwesome name="facebook-f" size={24} color="white" />
-            </ThemedView>
-           
+          </ThemedView>
         </ThemedView>
       </ThemedView>
     </ThemedView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

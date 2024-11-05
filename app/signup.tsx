@@ -10,15 +10,48 @@ const { width, height } = Dimensions.get('window');
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'password') {
-      Alert.alert('Login Successful', `Welcome, ${username}!`);
-    } else {
-      Alert.alert('Login Failed', 'Incorrect username or password.');
+  const handleSignup = async () => {
+    // Check for empty fields
+    if (!email || !username || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all fields.');
+      return;
+    }
+  
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+  
+    // Attempt to send signup data to server
+    try {
+      const response = await fetch('192.168.192.168:3000/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, username, password }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        // Success popup
+        Alert.alert('Success', 'User registered successfully!');
+      } else {
+        // Error popup if registration failed
+        Alert.alert('Error', data.message || 'Failed to create user.');
+      }
+    } catch (error) {
+      // Log the error and show an alert
+      console.error('Signup Error:', error);
+      Alert.alert('Error', 'An error occurred. Please try again.');
     }
   };
+  
 
   return (
     <ThemedView style={styles.container}>
@@ -33,6 +66,14 @@ const LoginPage = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+        <Text style={styles.label}>Username</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Username"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
@@ -51,16 +92,16 @@ const LoginPage = () => {
           style={styles.input}
           placeholder="Confirm password"
           secureTextEntry
-          value={password}
-          onChangeText={setPassword}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
 
         <TouchableOpacity onPress={() => Alert.alert('Forgot Password', 'Reset password link sent')}>
           <Text style={styles.forgotPassword}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Sign In</Text>
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
 
         <View style={styles.signupContainer}>
@@ -88,7 +129,6 @@ const LoginPage = () => {
     </ThemedView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

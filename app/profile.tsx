@@ -10,8 +10,14 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesom6 from '@expo/vector-icons/FontAwesome';
 const Tab = createBottomTabNavigator();
+import { useRouter } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
+import Chatcomponent from '../components/Chat'
+import Cancer from '../components/Cancer';
 
 const ProfileContent = () => {
+  const router = useRouter();
+  const { username } = useGlobalSearchParams();
   return (
     <ScrollView style={styles.container}>
       {/* Header section with user info */}
@@ -20,7 +26,7 @@ const ProfileContent = () => {
         <FontAwesom6 name="user-circle" size={50} color="skyblue" />
           <View style={styles.userText}>
             <Text style={styles.welcomeText}>Welcome Back</Text>
-            <Text style={styles.userName}>Dipanshu Kumar</Text>
+            <Text style={styles.userName}>{username}</Text>
           </View>
         </View>
 
@@ -94,7 +100,7 @@ const Profile = () => {
 
           if (route.name === 'Home') {
             iconName = 'home-outline';
-          } else if (route.name === 'Doctor') {
+          } else if (route.name === 'Cancer') {
             iconName = 'person-outline';
           } else if (route.name === 'Message') {
             iconName = 'chatbubble-outline';
@@ -111,8 +117,8 @@ const Profile = () => {
       })}
     >
       <Tab.Screen name="Home" component={ProfileContent} />
-      <Tab.Screen name="Doctor" component={ProfileContent} />
-      <Tab.Screen name="Message" component={ProfileContent} />
+      <Tab.Screen name="Cancer" component={Cancer} />
+      <Tab.Screen name="Message" component={Chatcomponent} />
       <Tab.Screen name="Medicine" component={ProfileContent} />
       <Tab.Screen name="History" component={ProfileContent} />
     </Tab.Navigator>
