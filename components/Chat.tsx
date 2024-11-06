@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, FlatList, Animated } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Animated, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 import Robot from '@expo/vector-icons/FontAwesome5';
 import { useGlobalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 const ChatScreen = () => {
   const { username } = useGlobalSearchParams();
@@ -11,6 +12,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [showCategories, setShowCategories] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Animated values for typing dots
   const dot1Anim = useRef(new Animated.Value(0)).current;
@@ -38,44 +40,79 @@ const ChatScreen = () => {
     }
   }, [isTyping]);
 
+  // Image picker function
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
+
+  // Function to handle sending the message and image together
   const handleSend = async () => {
-    if (userInput.trim() === '') return;
-
-
-       
-    // Add user's message to chat
-    const newMessage = { id: Date.now().toString(), text: userInput, sender: 'user' };
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    if (userInput.trim() === '' && !selectedImage) return;
+  
+    // Prepare the form data
+    const formData = new FormData();
+    formData.append('symptoms', userInput);
+    formData.append('username', username);
+  
+    // If an image is selected, append it to the form data
+    if (selectedImage) {
+      formData.append('image', {
+        uri: selectedImage,
+        name: 'uploaded_image.jpg',
+        type: 'image/jpeg',
+      });
+    }
+  
+    // Send the form data to the server
+    setMessages(prevMessages => [
+      ...prevMessages,
+      { id: Date.now().toString(), text: userInput, sender: 'user', image: selectedImage },  // Include image in the message
+    ]);
     setUserInput('');
-    setShowCategories(false); // Hide categories once the chat starts
-    setIsTyping(true); // Show typing indicator
-
+    setShowCategories(false);
+    setIsTyping(true);
+  
+    // Reset the image after sending
+    setSelectedImage(null);
+  
     try {
-      // Send POST request to the backend
       const response = await fetch('http://192.168.192.168:3000/generate-response', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',  // Updated to handle form data
         },
-        body: JSON.stringify({ symptoms: userInput, username: username }), // Replace with dynamic username if needed
+        body: formData,
       });
+  
       const data = await response.json();
-
-      // Add AI's response to chat
       const aiMessage = { id: Date.now().toString(), text: data.response, sender: 'ai' };
       setMessages(prevMessages => [...prevMessages, aiMessage]);
     } catch (error) {
       console.error('Error generating AI response:', error);
     } finally {
-      setIsTyping(false); // Hide typing indicator
+      setIsTyping(false);
     }
   };
-
+  
   const renderMessage = ({ item }) => (
-    <View style={[styles.messageContainer, item.sender === 'ai' ? styles.aiMessage : styles.userMessage]}>
+    <View
+      style={[
+        styles.messageContainer,
+        item.sender === 'ai' ? styles.aiMessage : styles.userMessage,
+      ]}
+    >
       <Text style={styles.messageText}>{item.text}</Text>
+      {item.image && <Image source={{ uri: item.image }} style={styles.previewImage} />}
     </View>
   );
+  
 
   return (
     <View style={styles.container}>
@@ -117,23 +154,15 @@ const ChatScreen = () => {
         </View>
       )}
 
-      {/* Categories */}
-      {showCategories && (
-        <ScrollView horizontal contentContainerStyle={styles.categories} showsHorizontalScrollIndicator={false}>
-          <View style={styles.category}>
-            <FontAwesome name="flask" size={20} color="#00A859" />
-            <Text style={styles.categoryText}>Mental Health</Text>
-          </View>
-          <View style={styles.category}>
-            <FontAwesome name="heartbeat" size={20} color="#0057A8" />
-            <Text style={styles.categoryText}>Heart Health</Text>
-          </View>
-          <View style={styles.category}>
-            <FontAwesome name="comments" size={20} color="#EB7100" />
-            <Text style={styles.categoryText}>Consultation</Text>
-          </View>
-        </ScrollView>
-      )}
+      {/* Image Picker and Upload */}
+      <View style={styles.imageUploadContainer}>
+        {selectedImage && (
+          <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+        )}
+        <TouchableOpacity style={styles.pickImageButton} onPress={pickImage}>
+          <Text style={styles.buttonText}>Select Image</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Chat Input */}
       <View style={styles.chatInputContainer}>
@@ -175,17 +204,6 @@ const styles = StyleSheet.create({
   aiMessage: { alignSelf: 'flex-start', backgroundColor: '#3E69FE', borderTopRightRadius: 22, borderTopLeftRadius: 22, borderBottomRightRadius: 22 },
   userMessage: { alignSelf: 'flex-end', backgroundColor: '#05294B', borderTopRightRadius: 11.5, borderTopLeftRadius: 11.5, borderBottomLeftRadius: 11.5 },
   messageText: { color: 'white', fontSize: 14 },
-  categories: { flexDirection: 'row', paddingHorizontal: 20, marginVertical: 10 },
-  category: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F6F6F6',
-    marginRight: 10,
-    borderRadius: 10,
-    width: 100,
-    height: 100,
-  },
-  categoryText: { marginTop: 5, fontSize: 12, fontWeight: '500', color: '#333' },
   chatInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -216,6 +234,15 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 2,
   },
+  imageUploadContainer: { flexDirection: 'row', alignItems: 'center', margin: 10 },
+  pickImageButton: {
+    padding: 10,
+    backgroundColor: 'green',
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+  previewImage: { width: 60, height: 60, borderRadius: 10 },
+  buttonText: { color: 'white', fontWeight: 'bold' },
 });
 
 export default ChatScreen;
