@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { useGlobalSearchParams } from 'expo-router';
 import Chatcomponent from '../components/Chat'
 import Cancer from '../components/Cancer';
+import Schedule from '@/components/Scedule';
 
 const ProfileContent = () => {
   const router = useRouter();
@@ -114,12 +115,13 @@ const Profile = () => {
         },
         tabBarActiveTintColor: '#1A73E8',
         tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { backgroundColor: '#FFFFFF',borderColor:'white' },
       })}
     >
       <Tab.Screen name="Home" component={ProfileContent} />
       <Tab.Screen name="Cancer" component={Cancer} />
       <Tab.Screen name="Message" component={Chatcomponent} />
-      <Tab.Screen name="Medicine" component={ProfileContent} />
+      <Tab.Screen name="Medicine" component={Schedule} />
       <Tab.Screen name="History" component={ProfileContent} />
     </Tab.Navigator>
   );

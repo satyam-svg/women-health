@@ -36,8 +36,30 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true }
 });
 
+const medicineSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, required: true },
+  dosage: { type: String, required: true },
+  schedule: { type: String, required: true },
+  capsulesLeft: { type: Number, required: true },
+});
+
+const Medicine = mongoose.model('Medicine', medicineSchema);
+
 // Create User model
 const User = mongoose.model('User', userSchema);
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(403).json({ message: 'No token provided' });
+
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(401).json({ message: 'Failed to authenticate token' });
+    req.userId = decoded.userId; // Attach userId to request
+    next();
+  });
+};
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -184,6 +206,33 @@ app.get('/protected', (req, res) => {
     if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
     res.status(200).json({ message: 'Protected data', userId: decoded.userId });
   });
+});
+
+app.post('/add-medicine', authenticateToken, async (req, res) => {
+  const { name, dosage, schedule, capsulesLeft } = req.body;
+
+  try {
+    const newMedicine = new Medicine({
+      userId: req.userId, // Associate with authenticated user
+      name,
+      dosage,
+      schedule,
+      capsulesLeft,
+    });
+
+    await newMedicine.save();
+    res.status(201).json({ message: 'Medicine added successfully', medicine: newMedicine });
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding medicine', error });
+  }
+});
+app.get('/medicines', authenticateToken, async (req, res) => {
+  try {
+    const medicines = await Medicine.find({ userId: req.userId });
+    res.status(200).json(medicines);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching medicines', error });
+  }
 });
 
 // Start the server

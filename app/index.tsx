@@ -28,10 +28,10 @@ const StartScreen = () => {
 
       <ThemedView style={styles.getstarted}>
             <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#E4E4E4',flex:1,justifyContent:'center',alignItems:'center'}}>
-              <ThemedText style={{fontWeight:'900',fontSize:20}}><Link href="/login">Sign in</Link></ThemedText>
+              <ThemedText style={{fontWeight:'900',fontSize:20,color:'black'}}><Link href="/login">Sign in</Link></ThemedText>
             </ThemedView>
             <ThemedView style={{width:137,height:50,borderRadius:15,backgroundColor:'#3E69FE',flex:1,justifyContent:'center',alignItems:'center'}}>
-            <ThemedText style={{fontWeight:'900',fontSize:20}}>Get Started</ThemedText>
+            <ThemedText style={{fontWeight:'900',fontSize:20,color:'black'}}>Get Started</ThemedText>
             </ThemedView>
           </ThemedView>
 
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 16,
     fontFamily: 'OpenSansCondensedBoldItalic', // Use the loaded font family
+    color: 'black'
   },
   image: {
     width: 100,

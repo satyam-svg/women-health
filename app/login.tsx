@@ -5,6 +5,8 @@ import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { Link } from 'expo-router';
 
 const LoginPage = () => {
@@ -28,11 +30,14 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
+      const token = data.token; // Ensure your backend returns this
       if (response.ok) {
         // Store the username from the response
         const username = data.username; // Ensure your backend returns this
         Alert.alert('Login Successful', `Welcome, ${username}!`);
-
+        await AsyncStorage.setItem('token',token);
+        const token1=await AsyncStorage.getItem('token')
+        console.log(token1)
         
         router.push({ pathname: '/profile', params: { username } });
       } else {
@@ -47,7 +52,7 @@ const LoginPage = () => {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.logoContainer}>
         <Image source={require('../assets/images/medicare.png')} style={{ height: 50, width: 50 }} />
-        <ThemedText style={{ fontWeight: 'bold', fontSize: 30, marginTop: 20 }}>Medicare</ThemedText>
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 25, marginTop: 20 ,color:'black'}}>Medicare</ThemedText>
       </ThemedView>
       <ThemedView style={styles.innerContainer}>
         <ThemedText style={styles.title}>Sign In</ThemedText>
@@ -198,7 +203,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     gap: 20,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor:"white",
   }
 });
 
