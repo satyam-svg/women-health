@@ -29,7 +29,7 @@ const LoginPage = () => {
   
     // Attempt to send signup data to server
     try {
-      const response = await fetch('192.168.192.168:3000/signup', {
+      const response = await fetch('http://192.168.167.168:3000/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

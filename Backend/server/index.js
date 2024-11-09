@@ -42,6 +42,9 @@ const medicineSchema = new mongoose.Schema({
   dosage: { type: String, required: true },
   schedule: { type: String, required: true },
   capsulesLeft: { type: Number, required: true },
+  morning: { type: Boolean, default: false },
+  evening: { type: Boolean, default: false },
+  night: { type: Boolean, default: false }
 });
 
 const Medicine = mongoose.model('Medicine', medicineSchema);
@@ -234,6 +237,37 @@ app.get('/medicines', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Error fetching medicines', error });
   }
 });
+
+// Assuming you're using Express.js
+app.patch('/update-medication-time/:id', async (req, res) => {
+  const { time, selected } = req.body; // time will be 'morning', 'evening', 'night', selected will be true or false
+  const { id } = req.params;
+
+  // Validate input
+  if (!time || !['morning', 'evening', 'night'].includes(time.toLowerCase())) {
+    return res.status(400).json({ message: 'Invalid time. Must be "morning", "evening", or "night".' });
+  }
+
+  try {
+    // Find the medication by ID
+    const medication = await Medicine.findById(id);
+    if (!medication) {
+      return res.status(404).json({ message: 'Medication not found.' });
+    }
+
+    // Update the corresponding field (e.g., 'morning', 'evening', or 'night')
+    medication[time.toLowerCase()] = selected; // selected will be true or false
+
+    // Save the updated medication
+    await medication.save();
+
+    res.status(200).json({ message: 'Medication time updated successfully.', medication });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {

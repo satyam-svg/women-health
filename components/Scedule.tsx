@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Alert, TextInput, Modal, TouchableWithoutFeedback } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,9 @@ const Schedule = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newMedicine, setNewMedicine] = useState({ name: '', dosage: '', schedule: '', capsulesLeft: '' });
   const [medications, setMedications] = useState([]);
+  const[morning, setMorning] = useState(true);
+  const [evening, setEvening] = useState(true); // Evening state
+  const [night, setNight] = useState(true); // Night state
 
   const fetchMedications = async () => {
     try {
@@ -18,19 +21,25 @@ const Schedule = () => {
         return;
       }
 
-      const response = await fetch('http://192.168.192.168:3000/medicines', {
+      const response = await fetch('http://192.168.167.168:3000/medicines', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMedications(data);
-      } else {
-        Alert.alert('Error', data.message || 'Failed to fetch medications.');
-      }
+        console.log(data[0].morning)
+        if (data[0].morning !== true) {
+          setMorning(false);
+        }
+        if (data[0].evening !== true) {
+          setEvening(false); // Check for evening field
+        }
+        if (data[0].night !== true) {
+          setNight(false); // Check for night field
+        }
+        setMedications(data);}
+      else Alert.alert('Error', data.message || 'Failed to fetch medications.');
     } catch (error) {
       Alert.alert('Error', 'An error occurred. Please try again.');
     }
@@ -48,7 +57,7 @@ const Schedule = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.192.168:3000/add-medicine', {
+      const response = await fetch('http://192.168.167.168:3000/add-medicine', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,9 +69,10 @@ const Schedule = () => {
       const data = await response.json();
       if (response.ok) {
         Alert.alert('Success', 'Medicine added successfully.');
+
         setModalVisible(false);
         setNewMedicine({ name: '', dosage: '', schedule: '', capsulesLeft: '' });
-        fetchMedications(); // Fetch medications again to update the list
+        fetchMedications();
       } else {
         Alert.alert('Error', data.message || 'Failed to add medicine.');
       }
@@ -71,25 +81,59 @@ const Schedule = () => {
     }
   };
 
-  const handleTimeSelection = (medicationId, time) => {
-    // Ensure selectedTimes is updated for each medication independently
-    setSelectedTimes((prev) => {
-      const existingTimes = prev[medicationId] || [];
-  
-      // Check if the time is already selected for the current medication
-      const isSelected = existingTimes.includes(time);
+  const handleTimeSelection = async (medicationId, time) => {
+    setSelectedTimes(prev => {
+      // Get the current selection for this medication, if any
+      const medicationTimes = prev[medicationId] || []; 
       
-      // Update state with the specific time change for this medication
-      return {
-        ...prev,
-        [medicationId]: isSelected
-          ? existingTimes.filter(t => t !== time)  // Remove the time if it's already selected
-          : [...existingTimes, time]               // Add the time if it's not selected
-      };
+      // Toggle the selected state for the clicked time (Morning, Evening, Night)
+      const updatedTimes = medicationTimes.includes(time)
+        ? medicationTimes.filter(t => t !== time) // Deselect time if already selected
+        : [...medicationTimes, time]; // Select time if not selected
+  
+      // Send PATCH request to update the medication time on the backend
+      updateMedicationTime(medicationId, time, !medicationTimes.includes(time)); // Toggle selection on backend
+    
+      // Update the selected times for this medication only
+      return { ...prev, [medicationId]: updatedTimes };
     });
   };
   
+  // Function to send PATCH request to update the medication time on the backend
+  const updateMedicationTime = async (medicationId, time, selected) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Authentication Error', 'You need to be logged in to update medication time.');
+        return;
+      }
   
+      const response = await fetch(`http://192.168.167.168:3000/update-medication-time/${medicationId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          time: time,      // "morning", "evening", or "night"
+          selected: selected,  // true or false
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Success', 'Medication time updated successfully.');
+      } else {
+        Alert.alert('Error', data.message || 'Failed to update medication time.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred. Please try again.');
+      console.log(error);
+    }
+  };
+  
+  
+
   const renderMedication = ({ item }) => (
     <View style={styles.medicationCard}>
       <View style={styles.medicationInfo}>
@@ -99,19 +143,18 @@ const Schedule = () => {
           <Text style={styles.medicationSchedule}>{item.schedule}</Text>
           <View style={styles.medicationFooter}>
             <View style={styles.timeSelection}>
-              {['Morning', 'Evening', 'Night'].map((timeOfDay) => (
-               <TouchableOpacity
-               key={timeOfDay}
-               style={[
-                 styles.timeCircle,
-                 selectedTimes[item.id]?.includes(timeOfDay) // Check if this time is selected for this medication
-                   ? styles.selectedCircle
-                   : styles.unselectedCircle,
-               ]}
-               onPress={() => handleTimeSelection(item.id, timeOfDay)}  // Pass the medication id and time
-             >
-               <Text style={styles.timeText}>{timeOfDay}</Text>
-             </TouchableOpacity>
+              {/* Dynamic Button Style based on selectedTimes state */}
+              {['morning', 'evening', 'night'].map((time) => (
+                <TouchableOpacity
+                  key={time}
+                  style={[
+                    styles.timeCircle,
+                    selectedTimes[item._id]?.includes(time) ? styles.selectedCircle : styles.unselectedCircle
+                  ]}
+                  onPress={() => handleTimeSelection(item._id, time)}
+                >
+                  <Text style={styles.timeText}>{time.charAt(0).toUpperCase() + time.slice(1)}</Text>
+                </TouchableOpacity>
               ))}
             </View>
             <Text style={styles.capsuleCount}>{item.capsulesLeft} capsules remain</Text>
@@ -120,6 +163,10 @@ const Schedule = () => {
       </View>
     </View>
   );
+  
+  
+  
+  
 
   return (
     <View style={styles.container}>
@@ -139,7 +186,7 @@ const Schedule = () => {
       <FlatList
         data={medications}
         renderItem={renderMedication}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
         style={styles.medicationList}
         showsVerticalScrollIndicator={false}
       />
@@ -154,42 +201,44 @@ const Schedule = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add New Medicine</Text>
-            <TextInput
-              placeholder="Name"
-              value={newMedicine.name}
-              onChangeText={(text) => setNewMedicine({ ...newMedicine, name: text })}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Dosage"
-              value={newMedicine.dosage}
-              onChangeText={(text) => setNewMedicine({ ...newMedicine, dosage: text })}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Schedule"
-              value={newMedicine.schedule}
-              onChangeText={(text) => setNewMedicine({ ...newMedicine, schedule: text })}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Capsules Left"
-              value={newMedicine.capsulesLeft}
-              onChangeText={(text) => setNewMedicine({ ...newMedicine, capsulesLeft: text })}
-              keyboardType="numeric"
-              style={styles.input}
-            />
-            <TouchableOpacity onPress={handleAddMedicine} style={styles.submitButton}>
-              <Text style={styles.submitButtonText}>Add Medicine</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Add New Medicine</Text>
+              <TextInput
+                placeholder="Name"
+                value={newMedicine.name}
+                onChangeText={(text) => setNewMedicine({ ...newMedicine, name: text })}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Dosage"
+                value={newMedicine.dosage}
+                onChangeText={(text) => setNewMedicine({ ...newMedicine, dosage: text })}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Schedule"
+                value={newMedicine.schedule}
+                onChangeText={(text) => setNewMedicine({ ...newMedicine, schedule: text })}
+                style={styles.input}
+              />
+              <TextInput
+                placeholder="Capsules Left"
+                value={newMedicine.capsulesLeft}
+                onChangeText={(text) => setNewMedicine({ ...newMedicine, capsulesLeft: text })}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={handleAddMedicine} style={styles.submitButton}>
+                <Text style={styles.submitButtonText}>Add Medicine</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -355,6 +404,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#333',
   },
+  
 });
 
 export default Schedule;
