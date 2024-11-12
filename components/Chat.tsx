@@ -83,7 +83,7 @@ const ChatScreen = () => {
     setSelectedImage(null);
   
     try {
-      const response = await fetch('http://192.168.167.168:3000/generate-response', {
+      const response = await fetch('http://192.168.253.168:3000/generate-response', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',  // Updated to handle form data

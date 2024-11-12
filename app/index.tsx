@@ -23,7 +23,10 @@ const StartScreen = () => {
       />
       <ThemedText style={styles.title}>MEDICARE</ThemedText>
       <ThemedView style={styles.lottieContainer}>
-          
+      <Image
+        source={require('../assets/images/doctor.png')}
+        
+      />
       </ThemedView>
 
       <ThemedView style={styles.getstarted}>
@@ -69,6 +72,7 @@ const styles = StyleSheet.create({
     height: '100%', // Make the animation fill the container
   },
   getstarted:{
+    marginTop:50,
     backgroundColor: '#CAF0F8',
     flex:1,
     flexDirection:'row',

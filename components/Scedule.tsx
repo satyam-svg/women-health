@@ -20,30 +20,36 @@ const Schedule = () => {
         Alert.alert('Authentication Error', 'You need to be logged in to fetch medications.');
         return;
       }
-
-      const response = await fetch('http://192.168.167.168:3000/medicines', {
+  
+      const response = await fetch('http://192.168.253.168:3000/medicines', {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` },
       });
-
+  
+      if (!response.ok) {
+        const data = await response.json();
+        Alert.alert('Error', data.message || 'Failed to fetch medications.');
+        return;
+      }
+  
       const data = await response.json();
-      if (response.ok) {
-        console.log(data[0].morning)
-        if (data[0].morning !== true) {
-          setMorning(false);
-        }
-        if (data[0].evening !== true) {
-          setEvening(false); // Check for evening field
-        }
-        if (data[0].night !== true) {
-          setNight(false); // Check for night field
-        }
-        setMedications(data);}
-      else Alert.alert('Error', data.message || 'Failed to fetch medications.');
+      if (data.length === 0) {
+        // If no medications are found, clear any existing medications and return
+        setMedications([]);
+      } else {
+        // Set the state only if data exists
+        setMedications(data);
+        // Update morning, evening, and night states based on the fetched data
+        setMorning(data[0].morning !== true);
+        setEvening(data[0].evening !== true);
+        setNight(data[0].night !== true);
+      }
     } catch (error) {
       Alert.alert('Error', 'An error occurred. Please try again.');
+      console.error(error);
     }
   };
+  
 
   useEffect(() => {
     fetchMedications();
@@ -57,7 +63,7 @@ const Schedule = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.167.168:3000/add-medicine', {
+      const response = await fetch('http://192.168.253.168:3000/add-medicine', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +114,7 @@ const Schedule = () => {
         return;
       }
   
-      const response = await fetch(`http://192.168.167.168:3000/update-medication-time/${medicationId}`, {
+      const response = await fetch(`http://192.168.253.168:3000/update-medication-time/${medicationId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -183,13 +189,19 @@ const Schedule = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={medications}
-        renderItem={renderMedication}
-        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-        style={styles.medicationList}
-        showsVerticalScrollIndicator={false}
-      />
+      {medications.length === 0 ? (
+    <View style={styles.noMedicationsContainer}>
+      <Text style={styles.noMedicationsText}>No medications added for reminders</Text>
+    </View>
+  ) : (
+    <FlatList
+      data={medications}
+      renderItem={renderMedication}
+      keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
+      style={styles.medicationList}
+      showsVerticalScrollIndicator={false}
+    />
+  )}
 
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
         <Icon name="add" size={24} color="white" />
@@ -345,6 +357,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     marginTop: 5,
+  },
+  noMedicationsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  noMedicationsText: {
+    fontSize: 16,
+    color: '#888',
+    fontStyle: 'italic',
   },
   addButton: {
     position: 'absolute',

@@ -47,6 +47,14 @@ const medicineSchema = new mongoose.Schema({
   night: { type: Boolean, default: false }
 });
 
+const periodSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  startDate: { type: Date, required: true }, // New field for the user's provided date
+  nextPeriodDate: { type: Date, required: true },
+});
+
+const Period = mongoose.model('Period', periodSchema);
+
 const Medicine = mongoose.model('Medicine', medicineSchema);
 
 // Create User model
@@ -264,6 +272,69 @@ app.patch('/update-medication-time/:id', async (req, res) => {
     res.status(200).json({ message: 'Medication time updated successfully.', medication });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+
+app.post('/set-period', authenticateToken, async (req, res) => {
+  const { startDate } = req.body; // Expecting start date input in 'YYYY-MM-DD' format
+
+  try {
+    const userId = req.userId;
+
+    // Parse the start date from the request body
+    const initialStartDate = new Date(startDate);
+    let nextPeriodDate = new Date(initialStartDate);
+    nextPeriodDate.setDate(nextPeriodDate.getDate() + 28); // Calculate next period date
+
+    // Check if there's an existing period record for the user
+    let periodRecord = await Period.findOne({ userId });
+
+    if (periodRecord) {
+      // Update both startDate and nextPeriodDate fields if record exists
+      periodRecord.startDate = initialStartDate;
+      periodRecord.nextPeriodDate = nextPeriodDate;
+    } else {
+      // Create a new period record if none exists
+      periodRecord = new Period({
+        userId,
+        startDate: initialStartDate,
+        nextPeriodDate,
+      });
+    }
+
+    // Save the updated or new period record
+    await periodRecord.save();
+
+    res.status(200).json({
+      message: 'Start and next period dates saved successfully.',
+      startDate: periodRecord.startDate,
+      nextPeriodDate: periodRecord.nextPeriodDate,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error setting period dates', error });
+  }
+});
+
+
+// Route: Get Next Period Date
+app.get('/get-next-period', authenticateToken, async (req, res) => {
+  try {
+    // Fetch the period record for the authenticated user
+    const periodRecord = await Period.findOne({ userId: req.userId });
+    
+    // If no period record is found for the user, return an error
+    if (!periodRecord) {
+      return res.status(404).json({ message: 'No period record found for this user.' });
+    }
+
+    // Return the next period date
+    res.status(200).json({
+      message: 'Next period date retrieved successfully.',
+      nextPeriodDate: periodRecord.nextPeriodDate,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching next period date', error });
   }
 });
 

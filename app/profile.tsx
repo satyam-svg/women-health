@@ -15,6 +15,7 @@ import { useGlobalSearchParams } from 'expo-router';
 import Chatcomponent from '../components/Chat'
 import Cancer from '../components/Cancer';
 import Schedule from '@/components/Scedule';
+import PeriodTracker from '@/components/Period';
 
 const ProfileContent = () => {
   const router = useRouter();
@@ -107,7 +108,7 @@ const Profile = () => {
             iconName = 'chatbubble-outline';
           } else if (route.name === 'Medicine') {
             iconName = 'medkit-outline';
-          } else if (route.name === 'History') {
+          } else if (route.name === 'Period') {
             iconName = 'time-outline';
           }
 
@@ -122,7 +123,7 @@ const Profile = () => {
       <Tab.Screen name="Cancer" component={Cancer} />
       <Tab.Screen name="Message" component={Chatcomponent} />
       <Tab.Screen name="Medicine" component={Schedule} />
-      <Tab.Screen name="History" component={ProfileContent} />
+      <Tab.Screen name="Period" component={PeriodTracker} />
     </Tab.Navigator>
   );
 };

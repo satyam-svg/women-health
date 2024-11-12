@@ -15,21 +15,18 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignup = async () => {
-    // Check for empty fields
     if (!email || !username || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill all fields.');
       return;
     }
   
-    // Check if passwords match
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match.');
       return;
     }
   
-    // Attempt to send signup data to server
     try {
-      const response = await fetch('http://192.168.167.168:3000/signup', {
+      const response = await fetch('http://192.168.253.168:3000/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,14 +36,11 @@ const LoginPage = () => {
   
       const data = await response.json();
       if (response.ok) {
-        // Success popup
         Alert.alert('Success', 'User registered successfully!');
       } else {
-        // Error popup if registration failed
         Alert.alert('Error', data.message || 'Failed to create user.');
       }
     } catch (error) {
-      // Log the error and show an alert
       console.error('Signup Error:', error);
       Alert.alert('Error', 'An error occurred. Please try again.');
     }
@@ -119,40 +113,42 @@ const LoginPage = () => {
 
         <ThemedView style={styles.icons}>
           <ThemedView style={styles.iconWrapper}>
-            <AntDesign name="google" size={24} color="white" />
+            <AntDesign name="google" size={width * 0.06} color="white" />
           </ThemedView>
           <ThemedView style={styles.iconWrapper}>
-            <FontAwesome name="facebook-f" size={24} color="white" />
+            <FontAwesome name="facebook-f" size={width * 0.06} color="white" />
           </ThemedView>
         </ThemedView>
       </ThemedView>
     </ThemedView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#CAF0F8',
   },
   logoContainer: {
-    backgroundColor: '#CAF0F8',
     alignItems: 'center',
     marginTop: height * 0.05,
+    backgroundColor:'#CAF0F8'
   },
   logoImage: {
-    height: 50,
-    width: 50,
+    height: width * 0.15,
+    width: width * 0.15,
     resizeMode: 'contain',
   },
   logoText: {
     fontWeight: 'bold',
-    fontSize: width * 0.08,
-    marginTop: 20,
+    fontSize: width * 0.06,
+    marginTop: height * 0.01,
+    color: 'black',
   },
   innerContainer: {
-    marginTop: '10%',
+    marginTop: height * 0.02,
     width: '100%',
-    padding: 40,
+    padding: width * 0.08,
     borderRadius: 40,
     backgroundColor: '#fff',
     shadowColor: '#000',
@@ -164,37 +160,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: width * 0.06,
     fontWeight: 'bold',
-    marginBottom: height * 0.04,
+    marginBottom: height * 0.02,
     color: '#333',
+    textAlign: 'center',
   },
   label: {
     fontSize: width * 0.04,
     color: '#333',
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: height * 0.01,
   },
   input: {
     width: '100%',
-    height: 40,
+    height: height * 0.05,
     borderColor: '#ccc',
     borderBottomWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginBottom: height * 0.015,
   },
   forgotPassword: {
     color: '#007AFF',
     textAlign: 'right',
-    marginBottom: 20,
+    marginBottom: height * 0.02,
   },
   button: {
     width: '100%',
-    height: 50,
+    height: height * 0.07,
     backgroundColor: '#FF5A5F',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: height * 0.02,
   },
   buttonText: {
     color: '#fff',
@@ -204,7 +201,7 @@ const styles = StyleSheet.create({
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: height * 0.05,
+    marginVertical: height * 0.03,
   },
   line: {
     flex: 1,
@@ -212,35 +209,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   orText: {
-    marginHorizontal: 10,
+    marginHorizontal: width * 0.02,
     color: '#ccc',
     fontWeight: 'bold',
   },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: height * 0.02,
   },
   signupText: {
     color: '#333',
+    fontSize: width * 0.04,
   },
   signupLink: {
     color: '#FF5A5F',
     fontWeight: 'bold',
+    fontSize: width * 0.04,
   },
   icons: {
     flexDirection: 'row',
-    gap: 20,
     justifyContent: 'center',
-    marginTop: height * 0.02,
+    marginTop: height * 0.00001,
+    backgroundColor:'white'
   },
   iconWrapper: {
-    width: 50,
-    height: 50,
+    width: width * 0.13,
+    height: width * 0.13,
     backgroundColor: '#FF5A5F',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: width * 0.02,
+    marginHorizontal: width * 0.02,
   },
 });
 
